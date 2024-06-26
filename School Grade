@@ -1,0 +1,58 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract SchoolGradingSystem {
+    struct Student {
+        uint id;
+        string uid;
+        string name;
+        uint grade;
+    }
+
+    mapping(uint => Student) private students;
+    mapping(string => bool) private uids;
+    mapping(uint => bool) private ids;
+
+    // Add a new student
+    function addStudent(uint studentId, string memory uid, string memory name) public {
+        require(!uids[uid], "UID already exists");
+        require(!ids[studentId], "Student ID already exists");
+        students[studentId] = Student(studentId, uid, name, 0);
+        uids[uid] = true;
+        ids[studentId] = true;
+    }
+
+    // Set the grade for a student
+    function setGrade(uint studentId, uint grade) public {
+        // Using require to ensure grade is within valid range
+        require(grade <= 100, "Grade must be between 0 and 100");
+        require(ids[studentId], "Student does not exist");
+        students[studentId].grade = grade;
+    }
+
+    // Retrieve a student's grade
+    function getGrade(uint studentId) public view returns (uint) {
+        // Using require to check student existence
+        require(ids[studentId], "Student does not exist");
+        return students[studentId].grade;
+    }
+
+    // Use assert to ensure data integrity (e.g., student's grade should be within 0 to 100)
+    function checkStudentGrade(uint studentId) public view {
+        require(ids[studentId], "Student does not exist");
+        uint grade = students[studentId].grade;
+        assert(grade <= 100 && grade >= 0);
+    }
+
+    // Use revert to handle specific error conditions (e.g., removing a student who doesn't exist)
+    function removeStudent(uint studentId) public {
+        if (!ids[studentId]) {
+            revert("Student does not exist");
+        }
+        delete uids[students[studentId].uid];
+        delete ids[studentId];
+        delete students[studentId];
+    }
+
+    
+}
